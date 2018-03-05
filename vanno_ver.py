@@ -255,21 +255,20 @@ class MainWindow(QMainWindow, WindowMixin):
         self.foldercnt = 0
         self.checkList = []
         self.verJobList = []
-        if self.logged_id == 'vdo_ver':
-            file = QFile(server_path + '../ids.txt')
+        file = QFile(server_path + '../ids.txt')
+        if file.open(QFile.ReadOnly | QFile.Text):
+            while not file.atEnd():
+                line = bytearray(file.readLine()).decode().strip()
+                insort(self.ids, line)
+        file.close()
+
+        for id in self.ids:
+            file = QFile(server_path + dataset + '/' + id + '.txt')
             if file.open(QFile.ReadOnly | QFile.Text):
                 while not file.atEnd():
                     line = bytearray(file.readLine()).decode().strip()
-                    insort(self.ids, line)
+                    insort(self.verJobList, line)
             file.close()
-
-            for id in self.ids:
-                file = QFile(server_path + dataset + '/' + id + '.txt')
-                if file.open(QFile.ReadOnly | QFile.Text):
-                    while not file.atEnd():
-                        line = bytearray(file.readLine()).decode().strip()
-                        insort(self.verJobList, line)
-                file.close()
 
         file = QFile(server_path + dataset + '/' + self.logged_id + '.txt')
         if file.open(QFile.ReadOnly | QFile.Text):
@@ -1327,15 +1326,12 @@ class MainWindow(QMainWindow, WindowMixin):
         # print(job_dict)
 
         ###
-        if self.logged_id == 'vdo_ver':
-            # job_list = list(chain(job_list))
+        # job_list = list(chain(job_list))
 
-            # job_list = job_dict.values()
-            # job_list = [k for j in job_list for k in j]
-            # print(job_list)
-            job_list = self.verJobList
-        else:
-            job_list = job_dict[self.logged_id]
+        # job_list = job_dict.values()
+        # job_list = [k for j in job_list for k in j]
+        # print(job_list)
+        job_list = self.verJobList
 
         self.folderListWidget.clear()
         self.mDirList = self.scanAllDirs(dirpath)

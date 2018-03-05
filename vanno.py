@@ -255,21 +255,6 @@ class MainWindow(QMainWindow, WindowMixin):
         self.foldercnt = 0
         self.checkList = []
         self.verJobList = []
-        if self.logged_id == 'vdo_ver':
-            file = QFile(server_path + '../ids.txt')
-            if file.open(QFile.ReadOnly | QFile.Text):
-                while not file.atEnd():
-                    line = bytearray(file.readLine()).decode().strip()
-                    insort(self.ids, line)
-            file.close()
-
-            for id in self.ids:
-                file = QFile(server_path + dataset + '/' + id + '.txt')
-                if file.open(QFile.ReadOnly | QFile.Text):
-                    while not file.atEnd():
-                        line = bytearray(file.readLine()).decode().strip()
-                        insort(self.verJobList, line)
-                file.close()
 
         file = QFile(server_path + dataset + '/' + self.logged_id + '.txt')
         if file.open(QFile.ReadOnly | QFile.Text):
@@ -300,9 +285,6 @@ class MainWindow(QMainWindow, WindowMixin):
 
         openPrevImg = action('&Prev Image', self.openPrevImg,
                              'a', 'prev', u'Open Prev')
-
-        verify = action('&Verify Image', self.verifyImg,
-                        'space', 'verify', u'Verify Image')
 
         save = action('&Save', self.saveFile,
                       's', 'save', u'Save labels to file', enabled=False)
@@ -458,7 +440,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, opendir, changeSavedir, openNextImg, openPrevImg, verify, save, None, create, copy, delete, None,
+            open, opendir, changeSavedir, openNextImg, openPrevImg, save, None, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -1327,15 +1309,7 @@ class MainWindow(QMainWindow, WindowMixin):
         # print(job_dict)
 
         ###
-        if self.logged_id == 'vdo_ver':
-            # job_list = list(chain(job_list))
-
-            # job_list = job_dict.values()
-            # job_list = [k for j in job_list for k in j]
-            # print(job_list)
-            job_list = self.verJobList
-        else:
-            job_list = job_dict[self.logged_id]
+        job_list = job_dict[self.logged_id]
 
         self.folderListWidget.clear()
         self.mDirList = self.scanAllDirs(dirpath)
@@ -1372,22 +1346,6 @@ class MainWindow(QMainWindow, WindowMixin):
             item = QListWidgetItem(imgPath)
             self.fileListWidget.addItem(item)
         self.edit_label.setText("Edit DIR: " + dirpath)
-
-
-    def verifyImg(self, _value=False):
-        # Proceding next image without dialog if having any label
-         if self.filePath is not None:
-            try:
-                self.labelFile.toggleVerify()
-            except AttributeError:
-                # If the labelling file does not exist yet, create if and
-                # re-save it with the verified attribute.
-                self.saveFile()
-                self.labelFile.toggleVerify()
-
-            self.canvas.verified = self.labelFile.verified
-            self.paintCanvas()
-            self.saveFile()
 
 
     def openPrevImg(self, _value=False):
